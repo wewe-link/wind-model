@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core", "numpy", "meson", "setuptools-scm>=8"]
+requires = ["scikit-build-core", "numpy<2.0", "meson", "setuptools-scm>=8"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -29,7 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "numpy>=1.23",
+    "numpy>=1.23,<2.0",
 ]
 
 [project.optional-dependencies]
