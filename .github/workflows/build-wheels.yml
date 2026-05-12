@@ -36,14 +36,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gfortran
-          pip install --upgrade pip setuptools
-          pip install "numpy<2.0" scikit-build-core cmake ninja meson
+          pip install --upgrade pip
+          pip install "setuptools<70" "numpy<2.0" scikit-build-core cmake ninja meson
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "numpy<2.0" scikit-build-core cmake ninja meson
+          python -m pip install --upgrade pip
+          pip install "setuptools<70" "numpy<2.0" scikit-build-core cmake ninja meson
           # Install MinGW-w64 with gfortran using Chocolatey
           choco install mingw --no-progress -y
 
