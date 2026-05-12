@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15...3.27)
 project(pyhwm2014 LANGUAGES Fortran C)
 
 # Find Python
-find_package(Python 3.12 COMPONENTS Interpreter Development REQUIRED)
+find_package(Python 3.10 COMPONENTS Interpreter Development REQUIRED)
 
 # Get NumPy location
 execute_process(
