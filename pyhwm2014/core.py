@@ -24,8 +24,8 @@ except ImportError as exc:
     raise ImportError(
         "Could not load the bundled HWM14 native extension for this platform. "
         "The package must contain a binary named for the current Python and OS, "
-        "for example hwm14.cp313-win_amd64.pyd on Windows/Python 3.13 or "
-        "hwm14.cpython-310-x86_64-linux-gnu.so on Linux/Python 3.10."
+        "for example hwm14.cp310-win_amd64.pyd on Windows/Python 3.10 or "
+        "hwm14.cp313-win_amd64.pyd on Windows/Python 3.13."
     ) from exc
 
 

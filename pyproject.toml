@@ -16,7 +16,6 @@ keywords = ["HWM14", "wind model", "atmospheric science"]
 classifiers = [
     "Intended Audience :: Science/Research",
     "Development Status :: 5 - Production/Stable",
-    "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -39,7 +38,6 @@ namespaces = false
 pyhwm2014 = [
     "py.typed",
     "*.pyd",
-    "*.so",
     "*.dll",
     "data/*.dat",
     "data/*.bin",

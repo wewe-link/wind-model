@@ -1,16 +1,12 @@
 pyHWM14
 =======
 
-Minimal Python interface for the HWM14 neutral wind model.
+Minimal Windows Python interface for the HWM14 neutral wind model.
 
-This repository intentionally ships prebuilt native extensions. The current
-tree includes a Windows CPython 3.13 extension:
+This repository ships prebuilt native extensions for 64-bit Windows:
 
-``pyhwm2014/hwm14.cp313-win_amd64.pyd``
-
-For Linux with Python 3.10, the package needs a matching extension file:
-
-``pyhwm2014/hwm14.cpython-310-x86_64-linux-gnu.so``
+* ``pyhwm2014/hwm14.cp310-win_amd64.pyd`` for CPython 3.10
+* ``pyhwm2014/hwm14.cp313-win_amd64.pyd`` for CPython 3.13
 
 The Fortran build system and tests were removed. The package is meant for using
 already compiled model binaries, not for rebuilding them during installation.
@@ -18,21 +14,21 @@ already compiled model binaries, not for rebuilding them during installation.
 Requirements
 ------------
 
-* Windows x64 with Python 3.13 and the bundled ``.pyd``
-* Linux x86_64 with Python 3.10 and a bundled ``.so`` built for CPython 3.10
+* Windows x64
+* Python 3.10 or Python 3.13
 * ``uv`` or ``pip``
 
 Installation
 ------------
 
-With ``uv``:
+With ``uv`` and Python 3.10:
 
-.. code-block:: bash
+.. code-block:: powershell
 
     uv venv --python 3.10 --seed .venv
-    uv pip install --python .venv/bin/python -e .
+    uv pip install --python .venv\Scripts\python.exe -e .
 
-On Windows:
+With ``uv`` and Python 3.13:
 
 .. code-block:: powershell
 
@@ -78,7 +74,5 @@ Basic Usage
 Notes
 -----
 
-Native Python extensions are tied to both the operating system and the CPython
-version. A Windows ``.pyd`` cannot be imported on Linux, and a CPython 3.13
-extension cannot be imported by CPython 3.10. Add the matching prebuilt binary
-to ``pyhwm2014/`` before installing on another platform.
+Native Python extensions are tied to the operating system and CPython version.
+This package currently bundles binaries for Windows CPython 3.10 and 3.13.
