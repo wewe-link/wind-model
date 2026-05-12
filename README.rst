@@ -14,13 +14,19 @@ Python interface for the Horizontal Wind Model version 2014 (HWM14)
 Installation
 ============
 
-----------------
+Quick Install
+-------------
+
+Binary wheels (Python 3.10+) available for Windows and Linux:
+
+.. code-block:: bash
+
+    pip install pyhwm2014
+
 From Source Code
 ----------------
 
-Currently requires Python 3.13+ with scikit-build-core (see Github Actions).
-
-IMPORTANT: For support in other Python versions and/or OS, users are invited to work on the case and submit a PR. Help making the project more generic!
+Requires Python 3.10+ with build tools:
 
 .. code-block:: bash
 
