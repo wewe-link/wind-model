@@ -1,413 +1,84 @@
-.. image:: https://github.com/rilma/pyHWM14/actions/workflows/ci.yaml/badge.svg
-    :target: https://github.com/rilma/pyHWM14/actions/workflows/ci.yaml
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.240890.svg
-   :target: http://doi.org/10.5281/zenodo.240890
-   
-=======
 pyHWM14
 =======
-Python interface for the Horizontal Wind Model version 2014 (HWM14)
 
-.. contents::
+Minimal Python interface for the HWM14 neutral wind model.
 
+This repository intentionally ships prebuilt native extensions. The current
+tree includes a Windows CPython 3.13 extension:
+
+``pyhwm2014/hwm14.cp313-win_amd64.pyd``
+
+For Linux with Python 3.10, the package needs a matching extension file:
+
+``pyhwm2014/hwm14.cpython-310-x86_64-linux-gnu.so``
+
+The Fortran build system and tests were removed. The package is meant for using
+already compiled model binaries, not for rebuilding them during installation.
+
+Requirements
+------------
+
+* Windows x64 with Python 3.13 and the bundled ``.pyd``
+* Linux x86_64 with Python 3.10 and a bundled ``.so`` built for CPython 3.10
+* ``uv`` or ``pip``
 
 Installation
-============
+------------
 
-----------------
-From Source Code
-----------------
-
-Currently requires Python 3.13+ with scikit-build-core (see Github Actions).
-
-IMPORTANT: For support in other Python versions and/or OS, users are invited to work on the case and submit a PR. Help making the project more generic!
+With ``uv``:
 
 .. code-block:: bash
 
-    $ git clone https://github.com/rilma/pyHWM14.git
-    $ cd pyHWM14
-    $ make install
+    uv venv --python 3.10 --seed .venv
+    uv pip install --python .venv/bin/python -e .
 
--------------------
-Make Targets (3.13)
--------------------
+On Windows:
 
-The repository uses ``uv`` (a fast, modern Python package manager) for managing Python versions and dependencies. All targets automatically install and use uv if needed.
+.. code-block:: powershell
 
-.. list-table::
-     :header-rows: 1
+    uv venv --python 3.13 --seed .venv
+    uv pip install --python .venv\Scripts\python.exe -e .
 
-     * - Target
-         - Purpose
-     * - ``make install-python313``
-         - Installs Python 3.13 with ``uv`` (if needed) and pins ``.python-version`` to 3.13.
-     * - ``make venv313``
-         - Creates/recreates a local ``.venv313`` using Python 3.13 via ``uv``.
-     * - ``make install313-sci``
-         - Installs build dependencies (scikit-build-core, cmake, ninja, meson) and project via ``uv pip``.
-     * - ``make test313``
-         - Runs the test suite using Python 3.13.
-     * - ``make clean``
-         - Removes build/test artifacts. Use ``make clean CLEAN_VENV=1`` to also remove ``.venv313``.
+With ``pip``:
 
-**About uv**: The project uses ``uv`` (https://github.com/astral-sh/uv) for fast, reliable dependency management and Python version control. Benefits include:
+.. code-block:: powershell
 
-- ⚡ 10-100x faster than pip
-- 📦 Reproducible builds via ``uv.lock``
-- 🎯 Single tool for Python + package management
-- 🔒 Superior dependency resolution
+    python -m pip install -e .
 
-Typical workflow:
+Quick Demo
+----------
 
-.. code-block:: bash
+.. code-block:: powershell
 
-        $ make install-python312
-        $ make install312-sci
-        $ source .venv312/bin/activate
-        $ make test312
+    .venv\Scripts\python.exe demo.py
 
-    Cleanup examples:
-
-    .. code-block:: bash
-
-        $ make clean
-        $ make clean CLEAN_VENV=1
-
----------
-From PyPi
----------
-
-::
-
-    pip install pyhwm2014
-
-Testing
-=======
-
-.. code-block:: bash
-
-    $ make test
-
-Getting Started
-===============
-
-This section provides a quick guide to retrieving zonal and meridional wind values from the HWM14 model.
-
------------------
-Basic Concepts
------------------
-
-The HWM14 model provides **zonal** (east-west) and **meridional** (north-south) wind components in the upper atmosphere. To retrieve wind values, you need to specify:
-
-* **Date/Time**: Year, day of year (1-366), and universal time (0-24 hours)
-* **Location**: Geographic latitude (-90° to 90°) and longitude (-180° to 180°)
-* **Altitude**: Height above Earth's surface in kilometers
-* **Geomagnetic Activity**: The ap index (default: -1 for climatology)
-
-**Wind Components:**
-
-* **Zonal wind (U)**: Positive = Eastward, Negative = Westward
-* **Meridional wind (V)**: Positive = Northward, Negative = Southward
-
-All wind values are in meters per second (m/s).
-
---------------------------
-Quick Start: Single Point
---------------------------
-
-Retrieve wind values at a specific location, date/time, and altitude:
+Basic Usage
+-----------
 
 .. code-block:: python
 
     from pyhwm2014 import HWM14
-    
-    # Define parameters
-    year = 2023
-    day_of_year = 150  # Approximately May 30
-    universal_time = 12.0  # 12:00 UT (noon)
-    altitude_km = 300.0  # 300 km altitude
-    latitude = 40.0  # 40°N
-    longitude = -105.0  # 105°W
-    ap_index = 10  # Geomagnetic activity index
-    
-    # Retrieve wind values
-    hwm14 = HWM14(
-        alt=altitude_km,
-        altlim=[altitude_km, altitude_km],
+
+    hwm = HWM14(
+        alt=300.0,
+        altlim=[300.0, 300.0],
         altstp=1,
-        year=year,
-        day=day_of_year,
-        ut=universal_time,
-        glat=latitude,
-        glon=longitude,
-        ap=[-1, ap_index],
-        option=1,
-        verbose=False
-    )
-    
-    # Access results
-    zonal_wind = hwm14.Uwind[0]  # m/s
-    meridional_wind = hwm14.Vwind[0]  # m/s
-    
-    print(f"Zonal wind: {zonal_wind:.2f} m/s")
-    print(f"Meridional wind: {meridional_wind:.2f} m/s")
-
---------------------------------
-Using Python datetime Objects
---------------------------------
-
-Convert Python datetime to required parameters:
-
-.. code-block:: python
-
-    from datetime import datetime
-    from pyhwm2014 import HWM14
-    
-    # Your datetime
-    dt = datetime(2024, 7, 15, 18, 30)  # July 15, 2024, 18:30
-    
-    # Convert to HWM14 parameters
-    year = dt.year
-    day_of_year = dt.timetuple().tm_yday
-    universal_time = dt.hour + dt.minute / 60.0
-    
-    # Now use with HWM14
-    hwm14 = HWM14(
-        alt=250.0,
-        altlim=[250.0, 250.0],
-        altstp=1,
-        year=year,
-        day=day_of_year,
-        ut=universal_time,
-        glat=0.0,
-        glon=0.0,
+        year=2023,
+        day=150,
+        ut=12.0,
+        glat=40.0,
+        glon=-105.0,
         ap=[-1, 10],
         option=1,
-        verbose=False
+        verbose=False,
     )
 
------------------------
-Command-Line Interface
------------------------
-
-Use the CLI tool for quick retrievals without writing code:
-
-.. code-block:: bash
-
-    # Single point retrieval
-    $ python scripts/retrieve.py --year 2023 --day 150 --time 12.0 \
-        --lat 40.0 --lon -105.0 --alt 300.0
-
-    # Height profile (multiple altitudes)
-    $ python scripts/retrieve.py --year 2023 --day 150 --time 12.0 \
-        --lat 40.0 --lon -105.0 --alt-range 100 400 50
-
-    # Using datetime format
-    $ python scripts/retrieve.py --datetime "2023-05-30 12:00:00" \
-        --lat 40.0 --lon -105.0 --alt 300.0
-
-    # Get JSON output
-    $ python scripts/retrieve.py --year 2023 --day 150 --time 12.0 \
-        --lat 40.0 --lon -105.0 --alt 300.0 --json
-
-----------------
-More Examples
-----------------
-
-For comprehensive examples including height profiles, latitude profiles, and more, see the ``scripts/`` directory which contains various example scripts.
-
-Run the comprehensive examples:
-
-.. code-block:: bash
-
-    $ python scripts/retrieve_values.py
-
-Examples
-========
-
-You will need seaborn (the statistical data visualization package) in order to run the following examples.
-
-.. code-block:: bash
-
-    $ pip install seaborn
-
-
---------------
-Height Profile
---------------
-
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM14, HWM14Plot    
-    >>> hwm14Obj = HWM14( altlim=[90,200], altstp=1, ap=[-1, 35], day=323,
-            option=1, ut=11.66667, verbose=False, year=1993 )            
-    >>> hwm14Gbj = HWM14Plot( profObj=hwm14Obj )
-    
-    
-.. image:: graphics/figure_1.png
-    :scale: 100 %
-
-You can also list the values on screen as follows
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM14
-    >>> hwm14Obj = HWM14( altlim=[90,200], altstp=10, ap=[-1, 35], day=323,
-            option=1, ut=11.66667, verbose=True, year=1993 )
-    
-    HEIGHT PROFILE
-                     quiet         disturbed             total
-     alt      mer      zon      mer      zon      mer      zon
-      90   11.112   28.727   -0.001   -0.000   11.112   28.726
-     100   26.762    6.705   -0.007   -0.006   26.755    6.700
-     110  -40.361    1.468   -0.080   -0.066  -40.442    1.402
-     120  -15.063  -16.198   -0.777   -0.640  -15.840  -16.838
-     130    5.352  -28.597   -2.713   -2.233    2.639  -30.829
-     140   -7.310  -28.295   -3.410   -2.806  -10.720  -31.101
-     150  -23.281  -26.597   -3.484   -2.867  -26.765  -29.464
-     160  -34.557  -20.983   -3.490   -2.872  -38.047  -23.855
-     170  -40.041  -13.405   -3.491   -2.872  -43.531  -16.277
-     180  -37.589  -12.893   -3.491   -2.872  -41.080  -15.765
-     190  -29.611  -18.405   -3.491   -2.872  -33.102  -21.278
-     200  -19.680  -26.278   -3.491   -2.872  -23.171  -29.150
-
-
-----------------------
-Geog. Latitude Profile
-----------------------
-
-.. code-block:: bash
-    
-    >>> from pyhwm2014 import HWM14, HWM14Plot
-    >>> hwm14Obj = HWM14( alt=130., ap=[-1, 35], day=323, glatlim=[-90.,90.],
-            glatstp=1., option=2, ut=11.66667, verbose=False, year=1993 )            
-    >>> hwm14Gbj = HWM14Plot( profObj=hwm14Obj )
-    
-        
-.. image:: graphics/figure_2.png
-    :scale: 100 %
-
-------------------
-GMT Profile
-------------------
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM14, HWM14Plot
-    >>> hwm14Obj = HWM14( alt=130., ap=[-1, 35], day=323,
-            option=3, utlim=[0., 23.45], utstp=.25, verbose=False, year=1993 )            
-    >>> hwm14Gbj = HWM14Plot( profObj=hwm14Obj )
-    
-
-.. image:: graphics/figure_3.png
-    :scale: 100 %
-
------------------------
-Geog. Longitude Profile
------------------------
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM14, HWM14Plot
-    >>> hwm14Obj = HWM14( alt=130., ap=[-1, 35], day=323, glonlim=[-180., 180.], glonstp=2.,
-            option=4, verbose=False, year=1993 )            
-    >>> hwm14Gbj = HWM14Plot( profObj=hwm14Obj )
-
-
-.. image:: graphics/figure_4.png
-    :scale: 100 %
-
------------------------
-Height vs GMT
------------------------
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM142D, HWM142DPlot
-    >>> hwm14Obj = HWM142D(altlim=[90,200], altstp=2, ap=[-1, 35], 
-            option=1, utlim=[0.,23.75], utstp=.25, verbose=False)
-    >>> hwm14Gbj = HWM142DPlot(profObj=hwm14Obj, zMin=[-75., -100], zMax=[75., 100.])
-
-.. image:: graphics/figure_11.png
-    :scale: 100 %
-
--------------------------
-Height vs Geog. Latitude
--------------------------
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM142D, HWM142DPlot
-    >>> hwm14Obj = HWM142D(altlim=[90., 200.], altstp=2., ap=[-1, 35], 
-            glatlim=[-90., 90.], glatstp=2., option=2, verbose=False, ut=12.)            
-    >>> hwm14Gbj = HWM142DPlot(profObj=hwm14Obj, zMin=[-250., -100], zMax=[250., 100.])
-
-.. image:: graphics/figure_12.png
-    :scale: 100 %
-
--------------------------
-Height vs Geog. Longitude
--------------------------
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM142D, HWM142DPlot
-    >>> hwm14Obj = HWM142D(altlim=[90., 200.], altstp=1., ap=[-1, 35], 
-            glonlim=[-90., 90.], glonstp=2., option=4, ut=12., verbose=False)            
-    >>> hwm14Gbj = HWM142DPlot(profObj=hwm14Obj, zMin=[-100., -100], zMax=[100., 100.])
-
-.. image:: graphics/figure_14.png
-    :scale: 100 %
-
-----------------------------------
-Geog. Latitude vs Geog. Longitude
-----------------------------------
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM142D, HWM142DPlot
-    >>> hwm14Obj = HWM142D(alt=130., ap=[-1, 35], glatlim=[-90., 90.], 
-            glatstp=1., glonlim=[-180., 180.], glonstp=2., option=6, verbose=False)
-    >>> hwm14Gbj = HWM142DPlot(profObj=hwm14Obj, zMin=[-150., -150], zMax=[150., 150.])
-
-.. image:: graphics/figure_16.png
-    :scale: 100 %
-
-----------------------------------
-Horizontal Wind Field Map 
-----------------------------------
-
-.. code-block:: bash
-
-    >>> from pyhwm2014 import HWM142D, HWM142DPlot
-    >>> hwm14Obj = HWM142D(alt=400., ap=[-1, 35], glatlim=[-90., 90.], glatstp=10., 
-            glonlim=[-180., 180.], glonstp=20., option=6, verbose=False)
-    >>> hwm14Gbj = HWM142DPlot( profObj=hwm14Obj, WF=True, zMin=[-150., -150], 
-            zMax=[150., 150.] )
-    
-.. image:: graphics/figure_16b.png
-    :scale: 100 %
-
-
-References
-==========
-
-.. [1] Peterson, P. `"F2PY: Fortran to Python interface generator" <https://sysbio.ioc.ee/projects/f2py2e/>`_
-
-.. [2] Drob, D. P. et al. `"An update to the Horizontal Wind Model (HWM): The quiet time thermosphere", Earth and Space Science, 2015 <http://onlinelibrary.wiley.com/doi/10.1002/2014EA000089/full>`_
-
----------------------
-Wrapping Fortran code
----------------------
-
-The Fortran extension is automatically built using CMake + f2py (Meson backend) during installation:
-
-.. code-block:: bash
-
-    $ pip install -e .
-
-This automatically invokes the build system defined in `pyproject.toml` and `CMakeLists.txt`. No manual compilation steps are needed.
-
-For details on the migration from deprecated `numpy.distutils` to the modern CMake/f2py build system, see `MIGRATION_PLAN_PY312.md`.
-
+    print(hwm.Uwind[0], hwm.Vwind[0])
+
+Notes
+-----
+
+Native Python extensions are tied to both the operating system and the CPython
+version. A Windows ``.pyd`` cannot be imported on Linux, and a CPython 3.13
+extension cannot be imported by CPython 3.10. Add the matching prebuilt binary
+to ``pyhwm2014/`` before installing on another platform.

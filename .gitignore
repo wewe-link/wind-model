@@ -1,16 +1,14 @@
-*.txt
-!CMakeLists.txt
 *.h5
 
-data/
 bin/
 venv*/
+.venv*/
 
 archive/
 
 *.pyc
 __pycache__/*
-*.pyd
+.pytest_cache/
 *.egg-info
 build/
 develop-eggs/
@@ -40,7 +38,6 @@ var/
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
